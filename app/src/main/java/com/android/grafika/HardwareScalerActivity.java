@@ -163,6 +163,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
         mRenderThread = new RenderThread(sv.getHolder());
         mRenderThread.setName("HardwareScaler GL render");
         mRenderThread.start();
+        //等待子线程 Handler 初始化完成
         mRenderThread.waitUntilReady();
 
         RenderHandler rh = mRenderThread.getHandler();
@@ -220,6 +221,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
         RenderHandler rh = mRenderThread.getHandler();
         if (rh != null) {
             Choreographer.getInstance().postFrameCallback(this);
+            //主线程通过 handler 通知子线程绘制
             rh.sendDoFrame(frameTimeNanos);
         }
     }
@@ -378,6 +380,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
             mHandler = new RenderHandler(this);
             mEglCore = new EglCore(null, 0);
             synchronized (mStartLock) {
+                //通知主线程，子线程初始化完成
                 mReady = true;
                 mStartLock.notify();    // signal waitUntilReady()
             }
